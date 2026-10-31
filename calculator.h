@@ -4,21 +4,24 @@
 #include <gtkmm/button.h>
 #include <gtkmm/window.h>
 #include <gtkmm/frame.h>
-//#include <gtkmm/grid>
-class HelloWorld : public Gtk::Window
+#include <gtkmm/grid.h>
+#include <gtkmm/label.h>
+class Calculator : public Gtk::Window
 {
 
 public:
-  HelloWorld();
+  Calculator();
 
 protected:
 
-  void on_button_clicked();
-  //Member widgets
-  Gtk::Button m_button;
-  Gtk::Frame m_Frame;
-  Gtk::Frame buttons_Frame;
-  Gtk::Frame label_Frame;
+  double a, b, result;
+  std::deque<char> screenValue;
+  void updateScreen(const std::string& label);
+  void onButtonClicked(const std::string& label);
+
+  Gtk::Label mainScreen;
+  std::vector<Gtk::Button> mainButtons;
+  Gtk::Grid mainGrid;
 };
 
 #endif
