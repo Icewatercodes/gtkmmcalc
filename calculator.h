@@ -6,6 +6,8 @@
 #include <gtkmm/frame.h>
 #include <gtkmm/grid.h>
 #include <gtkmm/label.h>
+#include "gtkmm/shortcutcontroller.h"
+
 class Calculator : public Gtk::Window
 {
 
@@ -14,14 +16,38 @@ public:
 
 protected:
 
+  
+  void updateScreen();
+  void onButtonClicked(const std::string& label);
+  void clearScreen();
+  void calculateResult();
+
+  enum CALCPosibleStates {
+    FIRST,
+    SECOND,
+    RESULT,
+    
+  };
+
+  enum CALCOperators {
+    NONE,
+    PLUS,
+    MINUS,
+    TIMES,
+    DIVIDE
+  };
+  enum CALCPosibleStates STATE = FIRST;
+  enum CALCOperators OPERATOR = NONE;
+
   double a, b, result;
   std::deque<char> screenValue;
-  void updateScreen(const std::string& label);
-  void onButtonClicked(const std::string& label);
+  double dequeToDouble(const std::deque<char>& in);
 
   Gtk::Label mainScreen;
   std::vector<Gtk::Button> mainButtons;
   Gtk::Grid mainGrid;
+  //auto Controller;
+  
 };
 
 #endif
