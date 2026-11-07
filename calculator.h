@@ -41,7 +41,8 @@ protected:
 
   double a, b, result;
   std::deque<char> screenValue;
-  double dequeToDouble(const std::deque<char>& in);
+  std::deque<char> doubleToDeque(double in = 0);
+  double dequeToDouble(const std::deque<char>& in = {});
 
   Gtk::Label mainScreen;
   std::vector<Gtk::Button> mainButtons;

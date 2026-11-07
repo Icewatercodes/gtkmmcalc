@@ -4,19 +4,19 @@
 #include <deque>
 #include <format>
 
-const std::vector<std::string> labels = {
-  "_", "_", "_", "AC",
-  "7", "8", "9", "/",
-   "4", "5", "6", "*",
-   "1", "2", "3", "-",
-   "0", ".", "=", "+"
+const std::vector<std::string> labels = 
+{
+  "", "", "", "AC",
+  "7", "8", "9", "",
+   "4", "5", "6", "",
+   "1", "2", "3", "",
+   "0", " ", "=", "+"
 };
 
 Calculator::Calculator()
 {
   set_name("window");
-  auto Controller = Gtk::ShortcutController::create();
-  std::cout << typeid(Controller).name() << "\n\n";
+  //auto Controller = Gtk::ShortcutController::create();
 
 
   for (size_t i = 0; i < labels.size(); i++) {
@@ -43,32 +43,49 @@ Calculator::Calculator()
 
 void Calculator::updateScreen()
 {
+  
+  if(STATE == RESULT) {
+    screenValue = doubleToDeque(result);
+    STATE = FIRST;
+  }
+
   Glib::ustring temp;
   for (size_t i = 0; i < screenValue.size(); i++) {
     temp.push_back(screenValue.at(i));
   }
 
-  mainScreen.set_label("<span size=\"xx-large\">" + temp + "</span>");
+  mainScreen.set_label("<span size=\"x-large\">" + temp + "</span>");
 }
 
-void Calculator::clearScreen() {
+void Calculator::clearScreen() 
+{
   while(!screenValue.empty()){
     screenValue.pop_back();
   }
   updateScreen();
 }
 
-double Calculator::dequeToDouble(const std::deque<char>& in = {})
+std::deque<char> Calculator::doubleToDeque(double in)
+{
+  std::string str = std::to_string(in); 
+  std::deque<char> out(str.begin(), str.end());
+  return out;
+}
+
+double Calculator::dequeToDouble(const std::deque<char>& in)
 {
   double out = 0;
-  for (const auto& i : in) {
-    out += int(i)*10^(i+1);
+  for (int i = 0; i < in.size(); i++) {
+    std::cout << "i: " << int(i - '0') << '\n';
+    out += int(in.at(i) - '0')*10^i;
   }
   return out;
 }
 
 void Calculator::calculateResult() 
-{  
+{
+  b = dequeToDouble(screenValue);
+  std::cout << std::format("a: {}, b: {}\n", a, b);
   switch(OPERATOR){
     case PLUS:
       result = a+b;
@@ -81,20 +98,24 @@ void Calculator::calculateResult()
 
 void Calculator::onButtonClicked(const std::string& label)
 {
-  std::cout << label[0] << "\n";
+  //std::cout << label[0] << "\n";
   switch(label[0]){
     case 'A':
       clearScreen();
       updateScreen();
-      std::cout << std::format("a: %i b: %i", a, b);
-      a,b,result = 0;
+      STATE = FIRST;
+      OPERATOR = NONE;
+      //std::cout << std::format("a: %i b: %i", a, b);
+      a,b,result = 0,0,0;
       break;
 
     case '+':
       if(STATE == FIRST) {
         a = dequeToDouble(screenValue);
         STATE = SECOND;
+        OPERATOR = PLUS;
         clearScreen();
+        updateScreen();
       } 
       break;
 
