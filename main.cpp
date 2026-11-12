@@ -3,13 +3,14 @@
 #include <iostream>
 #include <deque>
 #include <format>
+#include <print>
 
 const std::vector<std::string> labels = 
 {
   "", "", "", "AC",
   "7", "8", "9", "",
    "4", "5", "6", "",
-   "1", "2", "3", "",
+   "1", "2", "3", "-",
    "0", " ", "=", "+"
 };
 
@@ -75,10 +76,19 @@ std::deque<char> Calculator::doubleToDeque(double in)
 double Calculator::dequeToDouble(const std::deque<char>& in)
 {
   double out = 0;
-  for (int i = 0; i < in.size(); i++) {
-    std::cout << "i: " << int(i - '0') << '\n';
-    out += int(in.at(i) - '0')*10^i;
+  try {
+    for (long unsigned int i = 0; i < in.size(); i++) {
+      if(i == 0) {
+        out += int(in.at(in.size() - 1 - i) - '0');
+      } else {
+        out += int(in.at(in.size() - 1 - i) - '0')*10^i;
+      }
+    }
+  } catch (std::out_of_range) {
+    std::print("error std::out_of_range");
+    out = 0;
   }
+  std::print(" out: {}\n", out);
   return out;
 }
 
@@ -89,11 +99,15 @@ void Calculator::calculateResult()
   switch(OPERATOR){
     case PLUS:
       result = a+b;
-      STATE = RESULT;
-      updateScreen();
-      std::cout << result << '\n';
+    break;
+    case MINUS:
+      result = a-b;
+    default:
     break;
   }
+  STATE = RESULT;
+  updateScreen();
+  std::cout << "result: "<< result << '\n';
 }
 
 void Calculator::onButtonClicked(const std::string& label)
@@ -106,7 +120,7 @@ void Calculator::onButtonClicked(const std::string& label)
       STATE = FIRST;
       OPERATOR = NONE;
       //std::cout << std::format("a: %i b: %i", a, b);
-      a,b,result = 0,0,0;
+      a = 0; b = 0; result = 0;
       break;
 
     case '+':
@@ -117,6 +131,15 @@ void Calculator::onButtonClicked(const std::string& label)
         clearScreen();
         updateScreen();
       } 
+      break;
+    case '-':
+      if(STATE == FIRST){
+        a = dequeToDouble(screenValue);
+        STATE = SECOND;
+        OPERATOR = MINUS;
+        clearScreen();
+        updateScreen();
+      }
       break;
 
     case '=':
