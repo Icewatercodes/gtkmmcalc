@@ -21,6 +21,7 @@ protected:
   void onButtonClicked(const std::string& label);
   void clearScreen();
   void calculateResult();
+  void resetCalc();
 
   enum CALCPosibleStates {
     FIRST,
