@@ -10,8 +10,8 @@
 const std::vector<std::string> labels = 
 {
   "", "", "", "AC",
-  "7", "8", "9", "",
-   "4", "5", "6", "",
+  "7", "8", "9", "/",
+   "4", "5", "6", "*",
    "1", "2", "3", "-",
    "0", " ", "=", "+"
 };
@@ -106,7 +106,6 @@ void Calculator::resetCalc() {
       updateScreen();
       STATE = FIRST;
       OPERATOR = NONE;
-      //std::cout << std::format("a: %i b: %i", a, b);
       a = 0; b = 0; result = 0;
 }
 
@@ -120,6 +119,13 @@ void Calculator::calculateResult()
     break;
     case MINUS:
       result = a-b;
+    break;
+    case TIMES:
+      result = a*b;
+    break;
+    case DIVIDE:
+      result = a / b;
+    break;
     default:
     break;
   }
@@ -130,36 +136,30 @@ void Calculator::calculateResult()
 
 void Calculator::onButtonClicked(const std::string& label)
 {
-  //std::cout << label[0] << "\n";
   switch(label[0]){
     case 'A':
       resetCalc();
-      break;
+    return;
 
     case '+':
-      if(STATE == FIRST) {
-        a = dequeToDouble(screenValue);
-        STATE = SECOND;
-        OPERATOR = PLUS;
-        clearScreen();
-        updateScreen();
-      } 
-      break;
+      OPERATOR = PLUS;
+    break;
+
     case '-':
-      if(STATE == FIRST){
-        a = dequeToDouble(screenValue);
-        STATE = SECOND;
-        OPERATOR = MINUS;
-        clearScreen();
-        updateScreen();
-      }
-      break;
+      OPERATOR = MINUS;
+    break;
+
+    case '*':
+      OPERATOR = TIMES;
+    break;
+
+    case '/':
+      OPERATOR = DIVIDE;
+    break;
 
     case '=':
       calculateResult();
-    break;
-
-    
+    return;
 
     default:
       if(screenValue.size() >= 10)
@@ -168,7 +168,14 @@ void Calculator::onButtonClicked(const std::string& label)
       }
       screenValue.push_back(label[0]);
       updateScreen();
-      break;
+    return;
+  }
+
+  if(STATE == FIRST){
+    a = dequeToDouble(screenValue);
+    STATE = SECOND;
+    clearScreen();
+    updateScreen();
   }
 }
 
