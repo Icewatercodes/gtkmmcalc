@@ -4,6 +4,8 @@
 #include <deque>
 #include <format>
 #include <print>
+#include <chrono>
+#include <thread>
 
 const std::vector<std::string> labels = 
 {
@@ -78,18 +80,34 @@ double Calculator::dequeToDouble(const std::deque<char>& in)
   double out = 0;
   try {
     for (long unsigned int i = 0; i < in.size(); i++) {
+      std::print("dequeToDouble: 1: {} 2: {}\n", in.at(in.size() - 1 -i), int(in.at(in.size()-1-i)) - '0');
       if(i == 0) {
         out += int(in.at(in.size() - 1 - i) - '0');
       } else {
-        out += int(in.at(in.size() - 1 - i) - '0')*10^i;
+        out += int(in.at(in.size() - 1 - i) - '0')*std::pow(10,i);
       }
     }
   } catch (std::out_of_range) {
     std::print("error std::out_of_range");
     out = 0;
+    resetCalc();
+    screenValue = {'e','r','r','o','r'};
+    updateScreen();
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    screenValue = {};
+    updateScreen();
   }
-  std::print(" out: {}\n", out);
+  std::print("out: {}\n\n", out);
   return out;
+}
+
+void Calculator::resetCalc() {
+        clearScreen();
+      updateScreen();
+      STATE = FIRST;
+      OPERATOR = NONE;
+      //std::cout << std::format("a: %i b: %i", a, b);
+      a = 0; b = 0; result = 0;
 }
 
 void Calculator::calculateResult() 
@@ -115,12 +133,7 @@ void Calculator::onButtonClicked(const std::string& label)
   //std::cout << label[0] << "\n";
   switch(label[0]){
     case 'A':
-      clearScreen();
-      updateScreen();
-      STATE = FIRST;
-      OPERATOR = NONE;
-      //std::cout << std::format("a: %i b: %i", a, b);
-      a = 0; b = 0; result = 0;
+      resetCalc();
       break;
 
     case '+':
