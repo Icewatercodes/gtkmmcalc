@@ -1,6 +1,6 @@
-APP      := myapp
-APP_ID   := org.example.MyApp
-NAME     := My App
+APP      := gtkmmcalc
+APP_ID   := gtkmmcalc
+NAME     := Gtkmmcalc
 PREFIX   ?= $(HOME)/.local
 SRC      := $(wildcard *.cpp)
 
