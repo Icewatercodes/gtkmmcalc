@@ -78,24 +78,13 @@ std::deque<char> Calculator::doubleToDeque(double in)
 double Calculator::dequeToDouble(const std::deque<char>& in)
 {
   double out = 0;
-  try {
-    for (long unsigned int i = 0; i < in.size(); i++) {
-      std::print("dequeToDouble: 1: {} 2: {}\n", in.at(in.size() - 1 -i), int(in.at(in.size()-1-i)) - '0');
-      if(i == 0) {
-        out += int(in.at(in.size() - 1 - i) - '0');
-      } else {
-        out += int(in.at(in.size() - 1 - i) - '0')*std::pow(10,i);
-      }
+  for (long unsigned int i = 0; i < in.size(); i++) {
+    std::print("dequeToDouble: 1: {} 2: {}\n", in.at(in.size() - 1 -i), int(in.at(in.size()-1-i)) - '0');
+    if(i == 0) {
+      out += int(in.at(in.size() - 1 - i) - '0');
+    } else {
+      out += int(in.at(in.size() - 1 - i) - '0')*std::pow(10,i);
     }
-  } catch (std::out_of_range) {
-    std::print("error std::out_of_range");
-    out = 0;
-    resetCalc();
-    screenValue = {'e','r','r','o','r'};
-    updateScreen();
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-    screenValue = {};
-    updateScreen();
   }
   std::print("out: {}\n\n", out);
   return out;
