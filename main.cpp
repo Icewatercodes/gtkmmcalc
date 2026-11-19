@@ -20,6 +20,8 @@ Calculator::Calculator()
 {
   set_name("window");
 
+
+
   for (size_t i = 0; i < labels.size(); i++) {
     const std::string& lbl = labels[i];
     auto& btn = mainButtons.emplace_back(lbl);
@@ -31,6 +33,8 @@ Calculator::Calculator()
             lbl
           ));
     mainGrid.attach(btn, i%4, i/4+1);
+    btn.set_can_focus(false);
+
 
     if (lbl == "") continue;
 
@@ -59,39 +63,24 @@ Calculator::Calculator()
   auto controller = Gtk::EventControllerKey::create();
   controller->signal_key_pressed().connect(
       sigc::mem_fun(*this, &Calculator::onKeyPressed), false);
-  controller->signal_key_released().connect(
-      sigc::mem_fun(*this, &Calculator::onKeyReleased), false);
   add_controller(controller);
 }
 
 bool Calculator::onKeyPressed(guint keyval, guint /*keycode*/, Gdk::ModifierType /*state*/)
 {
-    auto it = keyToButtonIndex.find(keyval);
-    if (it != keyToButtonIndex.end() && it->second < mainButtons.size()) {
-        if (activeKey == 0) {
-            activeKey = keyval;
-            mainButtons[it->second].set_state_flags(Gtk::StateFlags::ACTIVE, false);
-        }
-        return true;
-    }
-    return false;
+  std::cout << "onKeyPressed called\n";
+  auto it = keyToButtonIndex.find(keyval);
+  if (it != keyToButtonIndex.end() && it->second < labels.size()) {
+    onButtonClicked(labels[it->second]);
+    return true;
+  }
+  return false;
 }
 
-void Calculator::onKeyReleased(guint keyval, guint /*keycode*/, Gdk::ModifierType /*state*/)
-{
-    if (keyval == activeKey) {
-        auto it = keyToButtonIndex.find(keyval);
-        if (it != keyToButtonIndex.end() && it->second < mainButtons.size()) {
-            auto& btn = mainButtons[it->second];
-            btn.unset_state_flags(Gtk::StateFlags::ACTIVE);
-            btn.activate(); // <-- Triggers signal_clicked() in gtkmm 4
-        }
-        activeKey = 0;
-    }
-}
 
 void Calculator::updateScreen()
 {
+  std::cout << "updateScreen called\n";
   if(STATE == RESULT) {
     screenValue = doubleToDeque(result);
     STATE = FIRST;
@@ -115,6 +104,7 @@ void Calculator::clearScreen()
 
 std::deque<char> Calculator::doubleToDeque(double in)
 {
+  std::cout << "doubleToDeque called\n";
   std::string str = std::to_string(in); 
   std::deque<char> out(str.begin(), str.end());
   return out;
@@ -136,15 +126,17 @@ double Calculator::dequeToDouble(const std::deque<char>& in)
 }
 
 void Calculator::resetCalc() {
-        clearScreen();
-      updateScreen();
-      STATE = FIRST;
-      OPERATOR = NONE;
-      a = 0; b = 0; result = 0;
+  std::cout << "resetCalc called\n";
+  clearScreen();
+  updateScreen();
+  STATE = FIRST;
+  OPERATOR = NONE;
+  a = 0; b = 0; result = 0;
 }
 
 void Calculator::calculateResult() 
 {
+  std::cout << "calculateResult called\n";
   b = dequeToDouble(screenValue);
   std::cout << std::format("a: {}, b: {}\n", a, b);
   switch(OPERATOR){
@@ -164,7 +156,6 @@ void Calculator::calculateResult()
     break;
   }
   STATE = RESULT;
-  updateScreen();
   std::cout << "result: "<< result << '\n';
 }
 
@@ -193,6 +184,7 @@ void Calculator::onButtonClicked(const std::string& label)
 
     case '=':
       calculateResult();
+      a = 0; b = 0; OPERATOR = NONE;
     break;
 
     default:
@@ -209,8 +201,8 @@ void Calculator::onButtonClicked(const std::string& label)
     a = dequeToDouble(screenValue);
     STATE = SECOND;
     clearScreen();
-    updateScreen();
   }
+  updateScreen();
 }
 
 int main(int argc, char* argv[])
