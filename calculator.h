@@ -40,6 +40,11 @@ protected:
   enum CALCPosibleStates STATE = FIRST;
   enum CALCOperators OPERATOR = NONE;
 
+  std::unordered_map<guint, size_t> keyToButtonIndex;
+  bool onKeyPressed(guint keyval, guint keycode, Gdk::ModifierType state);
+  void onKeyReleased(guint keyval, guint keycode, Gdk::ModifierType state);
+  guint activeKey = 0;
+
   double a, b, result;
   std::deque<char> screenValue;
   std::deque<char> doubleToDeque(double in = 0);

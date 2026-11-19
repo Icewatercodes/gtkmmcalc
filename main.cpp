@@ -1,5 +1,5 @@
 #include "calculator.h"
-#include <gtkmm/application.h>
+#include <gtkmm.h>
 #include <iostream>
 #include <deque>
 #include <format>
@@ -19,19 +19,33 @@ const std::vector<std::string> labels =
 Calculator::Calculator()
 {
   set_name("window");
-  //auto Controller = Gtk::ShortcutController::create();
-
 
   for (size_t i = 0; i < labels.size(); i++) {
-    auto& btn = mainButtons.emplace_back(labels[i]);
+    const std::string& lbl = labels[i];
+    auto& btn = mainButtons.emplace_back(lbl);
     btn.set_size_request(50,50);
     btn.signal_clicked().connect(
         sigc::bind(sigc::mem_fun(
             *this, 
             &Calculator::onButtonClicked), 
-            labels[i]
+            lbl
           ));
     mainGrid.attach(btn, i%4, i/4+1);
+
+    if (lbl == "") continue;
+
+    if(lbl == "="){
+      keyToButtonIndex[GDK_KEY_equal] = i;
+      keyToButtonIndex[GDK_KEY_Return] = i;
+      keyToButtonIndex[GDK_KEY_KP_Enter] = i;
+    } 
+    else if (lbl == "AC") {
+      keyToButtonIndex[GDK_KEY_Escape] = i;
+      keyToButtonIndex[GDK_KEY_BackSpace] = i;
+    } else {
+      guint keyval = gdk_unicode_to_keyval((guint32)(unsigned char)lbl[0]);
+      keyToButtonIndex[keyval] = i;
+    }
 
   }
 
@@ -42,11 +56,42 @@ Calculator::Calculator()
   mainGrid.set_column_spacing(10);
   set_child(mainGrid);
 
+  auto controller = Gtk::EventControllerKey::create();
+  controller->signal_key_pressed().connect(
+      sigc::mem_fun(*this, &Calculator::onKeyPressed), false);
+  controller->signal_key_released().connect(
+      sigc::mem_fun(*this, &Calculator::onKeyReleased), false);
+  add_controller(controller);
+}
+
+bool Calculator::onKeyPressed(guint keyval, guint /*keycode*/, Gdk::ModifierType /*state*/)
+{
+    auto it = keyToButtonIndex.find(keyval);
+    if (it != keyToButtonIndex.end() && it->second < mainButtons.size()) {
+        if (activeKey == 0) {
+            activeKey = keyval;
+            mainButtons[it->second].set_state_flags(Gtk::StateFlags::ACTIVE, false);
+        }
+        return true;
+    }
+    return false;
+}
+
+void Calculator::onKeyReleased(guint keyval, guint /*keycode*/, Gdk::ModifierType /*state*/)
+{
+    if (keyval == activeKey) {
+        auto it = keyToButtonIndex.find(keyval);
+        if (it != keyToButtonIndex.end() && it->second < mainButtons.size()) {
+            auto& btn = mainButtons[it->second];
+            btn.unset_state_flags(Gtk::StateFlags::ACTIVE);
+            btn.activate(); // <-- Triggers signal_clicked() in gtkmm 4
+        }
+        activeKey = 0;
+    }
 }
 
 void Calculator::updateScreen()
 {
-  
   if(STATE == RESULT) {
     screenValue = doubleToDeque(result);
     STATE = FIRST;
@@ -147,6 +192,7 @@ void Calculator::onButtonClicked(const std::string& label)
     case '=':
       calculateResult();
     break;
+
 
     
 
