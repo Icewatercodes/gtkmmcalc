@@ -193,14 +193,7 @@ void Calculator::onButtonClicked(const std::string& label)
 
     case '=':
       calculateResult();
-<<<<<<< HEAD
     break;
-
-
-    
-=======
-    return;
->>>>>>> 072b662a8a16723f540b5ecce479c4d373c75b26
 
     default:
       if(screenValue.size() >= 10)
